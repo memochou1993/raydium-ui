@@ -184,7 +184,7 @@ function ZapHead() {
     <Row className="justify-center mb-12 mobile:mb-2">
       <Tabs
         currentValue={'Zap'}
-        values={['Zap', 'Liquidity']}
+        values={['Zap']}
         onChange={(newTab) => {
           // setActiveTabValue(newTab)
           if (newTab === 'Liquidity') {
