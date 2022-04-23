@@ -59,6 +59,9 @@ import TokenSelectorDialog from '../components/dialogs/TokenSelectorDialog'
 import { Badge } from '@/components/Badge'
 import { isMintEqual } from '@/functions/judgers/areEqual'
 import { SplToken } from '@/application/token/type'
+import { usePools } from '@/application/pools/usePools'
+import toTotalPrice from '@/functions/format/toTotalPrice'
+import toUsdVolume from '@/functions/format/toUsdVolume'
 
 const { ContextProvider: LiquidityUIContextProvider, useStore: useLiquidityContextStore } = createContextStore({
   hasAcceptedPriceChange: false,
@@ -238,14 +241,16 @@ function LiquidityCard() {
     togglePermanentlyConfirm
   } = useLiquidityWarning()
 
-  const swapElementBox1 = useRef<HTMLDivElement>(null)
-
   const haveEnoughCoin1 =
     coin1 && checkWalletHasEnoughBalance(toTokenAmount(coin1, coin1Amount, { alreadyDecimaled: true }))
   const haveEnoughCoin2 =
     coin2 && checkWalletHasEnoughBalance(toTokenAmount(coin2, unslippagedCoin2Amount, { alreadyDecimaled: true }))
 
   const cardRef = useRef<HTMLDivElement>(null)
+
+  const { lpPrices } = usePools()
+  const tokenPrices = useToken((s) => s.tokenPrices)
+  const variousPrices = { ...lpPrices, ...tokenPrices }
 
   useEffect(() => {
     useLiquidity.setState({
@@ -268,9 +273,8 @@ function LiquidityCard() {
       {/* input twin */}
       <>
         <CoinInputBox
-          domRef={swapElementBox1}
           disabled={isApprovePanelShown}
-          componentRef={coinInputBox1ComponentRef}
+          componentRef={coinInputBox0ComponentRef}
           haveHalfButton
           haveCoinIcon
           canSelect
@@ -286,7 +290,19 @@ function LiquidityCard() {
           token={coin0}
           value={coin0Amount ? (eq(coin0Amount, 0) ? '' : toString(coin0Amount)) : undefined}
           onUserInput={(value) => {
-            useLiquidity.setState({ focusSide: 'coin0', coin0Amount: value })
+            const price0 = variousPrices[String(coin0?.mint)] ?? null
+            const price1 = variousPrices[String(coin1?.mint)] ?? null
+            const price2 = variousPrices[String(coin2?.mint)] ?? null
+            const coin1Amount =
+              Number(toTotalPrice(value, price0).toExact()) / 2 / Number(toTotalPrice(1, price1).toExact())
+            const coin2Amount =
+              Number(toTotalPrice(value, price0).toExact()) / 2 / Number(toTotalPrice(1, price2).toExact())
+            useLiquidity.setState({
+              focusSide: 'coin0',
+              coin0Amount: value,
+              unslippagedCoin1Amount: String(coin1Amount),
+              unslippagedCoin2Amount: String(coin2Amount)
+            })
           }}
         />
         <CoinInputBox
