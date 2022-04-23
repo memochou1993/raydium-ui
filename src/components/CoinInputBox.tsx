@@ -241,7 +241,7 @@ export default function CoinInputBox({
       </Row>
 
       {/* input-container */}
-      <Row className="col-span-full items-center">
+      <Row className="items-center col-span-full">
         <Row
           className={`items-center gap-1.5 ${
             canSelect && !disabledTokenSelect ? 'clickable clickable-mask-offset-2' : ''
@@ -262,7 +262,7 @@ export default function CoinInputBox({
         {/* divider */}
         <div className="my-1 mx-4 mobile:my-0 mobile:mx-2 border-r border-[rgba(171,196,255,0.5)] self-stretch" />
         <Row className="justify-between flex-grow-2">
-          <Row className="gap-px items-center mr-2">
+          <Row className="items-center gap-px mr-2">
             <Button
               disabled={disabledInput || !token}
               className="py-0.5 px-1.5 rounded text-[rgba(171,196,255,.5)] font-bold bg-[#1B1659] bg-opacity-80 text-xs mobile:text-2xs transition"
@@ -285,7 +285,7 @@ export default function CoinInputBox({
             )}
           </Row>
           <Input
-            className="font-medium text-lg text-white flex-grow w-full"
+            className="flex-grow w-full text-lg font-medium text-white"
             disabled={disabledInput || !token}
             type="number"
             pattern={validPattern}
