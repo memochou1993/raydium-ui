@@ -14,6 +14,13 @@ import useToken from './token/useToken'
 import useFarms from './farms/useFarms'
 
 export type PageRouteConfigs = {
+  '/zap': {
+    queryProps?: {
+      coin1?: SplToken
+      coin2?: SplToken
+      ammId?: string
+    }
+  }
   '/swap': {
     queryProps?: {
       coin1?: SplToken
@@ -53,7 +60,28 @@ export function routeTo<ToPage extends keyof PageRouteConfigs>(
   opts?: MayFunction<PageRouteConfigs[ToPage], [{ currentPageQuery: ParsedUrlQuery }]>
 ): void {
   const options = shrinkToValue(opts, [{ currentPageQuery: router.query }])
-  if (toPage === '/swap') {
+  if (toPage === '/zap') {
+    /** get info from queryProp */
+    const ammId = options?.queryProps?.ammId
+    const coin1 =
+      options?.queryProps?.coin1 ?? (router.pathname.includes('swap') ? useSwap.getState().coin1 : undefined)
+    const coin2 =
+      options?.queryProps?.coin2 ?? (router.pathname.includes('swap') ? useSwap.getState().coin2 : undefined)
+    const isSwapDirectionReversed = useSwap.getState().directionReversed
+    const upCoin = isSwapDirectionReversed ? coin2 : coin1
+    const downCoin = isSwapDirectionReversed ? coin1 : coin2
+    const mode = options?.queryProps?.mode
+    router.push({ pathname: '/zap' }).then(() => {
+      /** jump to target page */
+      useLiquidity.setState(
+        objectShakeFalsy({
+          coin1: upCoin,
+          coin2: downCoin,
+          ammId
+        })
+      )
+    })
+  } else if (toPage === '/swap') {
     const coin1 =
       options?.queryProps?.coin1 ??
       (router.pathname.includes('/liquidity/add') ? useLiquidity.getState().coin1 : undefined)
