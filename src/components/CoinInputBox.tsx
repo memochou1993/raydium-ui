@@ -60,6 +60,7 @@ export interface CoinInputBoxProps {
   onEnter?(input: string | undefined): void
   // customize component appearance
   topLeftLabel?: ReactNode
+  haveMaxButton?: boolean
   haveHalfButton?: boolean
   haveCoinIcon?: boolean
   canSelect?: boolean
@@ -91,6 +92,7 @@ export default function CoinInputBox({
   topLeftLabel,
   forceBalance,
   forceBalanceDepositMode,
+  haveMaxButton,
   haveHalfButton,
   haveCoinIcon,
   canSelect
@@ -263,15 +265,17 @@ export default function CoinInputBox({
         <div className="my-1 mx-4 mobile:my-0 mobile:mx-2 border-r border-[rgba(171,196,255,0.5)] self-stretch" />
         <Row className="justify-between flex-grow-2">
           <Row className="gap-px items-center mr-2">
-            <Button
-              disabled={disabledInput || !token}
-              className="py-0.5 px-1.5 rounded text-[rgba(171,196,255,.5)] font-bold bg-[#1B1659] bg-opacity-80 text-xs mobile:text-2xs transition"
-              onClick={() => {
-                fillAmountWithBalance(1)
-              }}
-            >
-              Max
-            </Button>
+            {haveMaxButton && (
+              <Button
+                disabled={disabledInput || !token}
+                className="py-0.5 px-1.5 rounded text-[rgba(171,196,255,.5)] font-bold bg-[#1B1659] bg-opacity-80 text-xs mobile:text-2xs transition"
+                onClick={() => {
+                  fillAmountWithBalance(1)
+                }}
+              >
+                Max
+              </Button>
+            )}
             {haveHalfButton && (
               <Button
                 disabled={disabledInput || !token}

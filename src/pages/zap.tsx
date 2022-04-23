@@ -275,6 +275,7 @@ function LiquidityCard() {
         <CoinInputBox
           disabled={isApprovePanelShown}
           componentRef={coinInputBox0ComponentRef}
+          haveMaxButton
           haveHalfButton
           haveCoinIcon
           canSelect
@@ -319,7 +320,6 @@ function LiquidityCard() {
           disabled={isApprovePanelShown}
           componentRef={coinInputBox1ComponentRef}
           value={unslippagedCoin1Amount}
-          haveHalfButton
           haveCoinIcon
           canSelect
           topLeftLabel=""
@@ -374,7 +374,6 @@ function LiquidityCard() {
           componentRef={coinInputBox2ComponentRef}
           disabled={isApprovePanelShown}
           value={unslippagedCoin2Amount}
-          haveHalfButton
           haveCoinIcon
           canSelect
           topLeftLabel=""
