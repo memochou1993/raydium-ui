@@ -111,6 +111,7 @@ export default function CoinInputBox({
   useEffect(() => {
     if (isOutsideValueLocked.current) return
     setInputedAmount(value)
+    console.log(114, value);
   }, [value])
   useEffect(() => {
     if (!isOutsideValueLocked.current) return

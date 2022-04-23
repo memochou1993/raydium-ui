@@ -93,7 +93,7 @@ function LiquidityEffect() {
 // const availableTabValues = ['Swap', 'Liquidity'] as const
 function LiquidityPageHead() {
   return (
-    <Row className="mb-12 mobile:mb-2 self-center">
+    <Row className="self-center mb-12 mobile:mb-2">
       <Tabs
         currentValue={'Liquidity'}
         values={['Swap', 'Liquidity']}
@@ -208,7 +208,7 @@ function LiquidityCard() {
   const { connected, owner } = useWallet()
   const [isCoinSelectorOn, { on: turnOnCoinSelector, off: turnOffCoinSelector }] = useToggle()
   // it is for coin selector panel
-  const [targetCoinNo, setTargetCoinNo] = useState<'1' | '2'>('1')
+  const [targetCoinNo, setTargetCoinNo] = useState<'1' | '2' | '3'>('1')
 
   const checkWalletHasEnoughBalance = useWallet((s) => s.checkWalletHasEnoughBalance)
 
@@ -259,7 +259,7 @@ function LiquidityCard() {
     <CyberpunkStyleCard
       domRef={cardRef}
       wrapperClassName="w-[min(456px,100%)] self-center cyberpunk-bg-light"
-      className="py-8 pt-4 px-6 mobile:py-5"
+      className="px-6 py-8 pt-4 mobile:py-5"
       size="lg"
       style={{
         background:
@@ -324,27 +324,29 @@ function LiquidityCard() {
           </Row>
         </div>
 
+        {unslippagedCoin2Amount}
         <CoinInputBox
-          componentRef={coinInputBox2ComponentRef}
+          className="mt-5"
           disabled={isApprovePanelShown}
-          value={unslippagedCoin2Amount}
+          componentRef={coinInputBox1ComponentRef}
+          value={unslippagedCoin1Amount}
           haveHalfButton
           haveCoinIcon
           canSelect
           topLeftLabel=""
           onTryToTokenSelect={() => {
             turnOnCoinSelector()
-            setTargetCoinNo('2')
+            setTargetCoinNo('3')
+          }}
+          onUserInput={(amount) => {
+            useLiquidity.setState({ coin3Amount: amount, focusSide: 'coin3' })
           }}
           onEnter={(input) => {
             if (!input) return
-            if (!coin1) coinInputBox1ComponentRef.current?.selectToken?.()
-            if (coin1 && coin1Amount) liquidityButtonComponentRef.current?.click?.()
+            if (!coin2) coinInputBox2ComponentRef.current?.selectToken?.()
+            if (coin2 && coin2Amount) liquidityButtonComponentRef.current?.click?.()
           }}
-          onUserInput={(amount) => {
-            useLiquidity.setState({ coin2Amount: amount, focusSide: 'coin2' })
-          }}
-          token={coin2}
+          token={coin1}
         />
       </>
 
@@ -365,7 +367,7 @@ function LiquidityCard() {
 
       {/* supply button */}
       <Button
-        className="block frosted-glass-teal w-full mt-5"
+        className="block w-full mt-5 frosted-glass-teal"
         componentRef={liquidityButtonComponentRef}
         validators={[
           {
@@ -635,7 +637,7 @@ function LiquidityCardInfo({ className }: { className?: string }) {
                         }
                       }}
                     />
-                    <div className="opacity-50 ml-1">%</div>
+                    <div className="ml-1 opacity-50">%</div>
                   </Row>
                 }
               />
@@ -690,7 +692,7 @@ function LiquidityCardTooltipPanelAddress() {
   const { lpMint, id } = useLiquidity((s) => s.currentJsonInfo) ?? {}
   return (
     <div className="w-56">
-      <div className="text-sm font-semibold mb-2">Addresses</div>
+      <div className="mb-2 text-sm font-semibold">Addresses</div>
       <Col className="gap-2">
         {coin1 && (
           <LiquidityCardTooltipPanelAddressItem
@@ -793,7 +795,7 @@ function UserLiquidityExhibition() {
                     <Collapse.Face>
                       {(open) => (
                         <Row className="items-center justify-between">
-                          <Row className="gap-2 items-center">
+                          <Row className="items-center gap-2">
                             <CoinAvatarPair
                               className="justify-self-center"
                               token1={info.baseToken}
@@ -816,19 +818,19 @@ function UserLiquidityExhibition() {
                       <Col className="border-t-1.5 border-[rgba(171,196,255,.5)] mt-5 mobile:mt-4 py-5 gap-3">
                         <Row className="justify-between">
                           <div className="text-xs mobile:text-2xs font-medium text-[#abc4ff]">Pooled (Base)</div>
-                          <div className="text-xs mobile:text-2xs font-medium text-white">
+                          <div className="text-xs font-medium text-white mobile:text-2xs">
                             {toString(info.userBasePooled) || '--'} {info.baseToken?.symbol}
                           </div>
                         </Row>
                         <Row className="justify-between">
                           <div className="text-xs mobile:text-2xs font-medium text-[#abc4ff]">Pooled (Quote)</div>
-                          <div className="text-xs mobile:text-2xs font-medium text-white">
+                          <div className="text-xs font-medium text-white mobile:text-2xs">
                             {toString(info.userQuotePooled) || '--'} {info.quoteToken?.symbol}
                           </div>
                         </Row>
                         <Row className="justify-between">
                           <div className="text-xs mobile:text-2xs font-medium text-[#abc4ff]">Your Liquidity</div>
-                          <div className="text-xs mobile:text-2xs font-medium text-white">
+                          <div className="text-xs font-medium text-white mobile:text-2xs">
                             {info.lpMint
                               ? toString(div(rawBalances[String(info.lpMint)], 10 ** info.lpDecimals), {
                                   decimalLength: `auto ${info.lpDecimals}`
@@ -839,14 +841,14 @@ function UserLiquidityExhibition() {
                         </Row>
                         <Row className="justify-between">
                           <div className="text-xs mobile:text-2xs font-medium text-[#abc4ff]">Your share</div>
-                          <div className="text-xs mobile:text-2xs font-medium text-white">
+                          <div className="text-xs font-medium text-white mobile:text-2xs">
                             {computeSharePercentValue(info.sharePercent)}
                           </div>
                         </Row>
                       </Col>
                       <Row className="gap-4 mb-1">
                         <Button
-                          className="text-base mobile:text-sm font-medium frosted-glass frosted-glass-teal rounded-xl flex-grow"
+                          className="flex-grow text-base font-medium mobile:text-sm frosted-glass frosted-glass-teal rounded-xl"
                           onClick={() => {
                             useLiquidity.setState({
                               currentJsonInfo: info.jsonInfo

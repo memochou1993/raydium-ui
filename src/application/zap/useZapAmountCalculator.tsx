@@ -32,8 +32,10 @@ export function useZapAmountCalculator() {
   const connection = useConnection((s) => s.connection)
   const coin1 = useZap((s) => s.coin1)
   const coin2 = useZap((s) => s.coin2)
+  const coin3 = useZap((s) => s.coin3)
   const userCoin1Amount = useZap((s) => s.coin1Amount)
   const userCoin2Amount = useZap((s) => s.coin2Amount)
+  const userCoin3Amount = useZap((s) => s.coin3Amount)
   const refreshCount = useZap((s) => s.refreshCount)
   const directionReversed = useZap((s) => s.directionReversed)
   const focusSide = directionReversed ? 'coin2' : 'coin1' // temporary focus side is always up, due to zap route's `Trade.getBestAmountIn()` is not ready
@@ -154,6 +156,8 @@ export function useZapAmountCalculator() {
         slippageTolerance
       })
 
+      console.log(159, calcResult);
+
       if (focusDirectionSide === 'up') {
         const { routes, priceImpact, executionPrice, currentPrice, zapable, routeType, fee } = calcResult ?? {}
         const { amountOut, minAmountOut } = (calcResult?.info ?? {}) as { amountOut?: string; minAmountOut?: string }
@@ -167,7 +171,8 @@ export function useZapAmountCalculator() {
           maxSpent: undefined,
           zapable,
           routeType,
-          ...{ [focusSide === 'coin1' ? 'coin2Amount' : 'coin1Amount']: amountOut }
+          ...{ [focusSide === 'coin1' ? 'coin2Amount' : 'coin1Amount']: amountOut },
+          ...{ [focusSide === 'coin1' ? 'coin3Amount' : 'coin1Amount']: amountOut }
         })
       } else {
         const { routes, priceImpact, executionPrice, currentPrice, zapable, routeType, fee } = calcResult ?? {}
@@ -182,7 +187,8 @@ export function useZapAmountCalculator() {
           maxSpent: maxAmountIn,
           zapable,
           routeType,
-          ...{ [focusSide === 'coin1' ? 'coin2Amount' : 'coin1Amount']: amountIn }
+          ...{ [focusSide === 'coin1' ? 'coin2Amount' : 'coin1Amount']: amountIn },
+          ...{ [focusSide === 'coin1' ? 'coin3Amount' : 'coin1Amount']: amountIn },
         })
       }
     } catch (err) {

@@ -206,15 +206,17 @@ function ZapCard() {
     coin1Amount,
     coin2,
     coin2Amount,
-    unslippagedCoin2Amount,
     coin3,
     coin3Amount,
+    unslippagedCoin2Amount,
     unslippagedCoin3Amount,
     // currentJsonInfo,
     currentHydratedInfo
     // isSearchAmmDialogOpen,
     // refreshLiquidity
   } = useZap()
+  
+  console.log(219, useZap())
 
   const hasHydratedLiquidityPool = useMemo(() => Boolean(currentHydratedInfo), [currentHydratedInfo])
 
@@ -237,6 +239,10 @@ function ZapCard() {
   const downCoin = directionReversed ? coin1 : coin2
   // although info is included in routes, still need downCoinAmount to pop friendly feedback
   const downCoinAmount = (directionReversed ? coin1Amount : coin2Amount) || '0'
+
+  const down2Coin = directionReversed ? coin1 : coin3
+  // although info is included in routes, still need downCoinAmount to pop friendly feedback
+  const down2CoinAmount = (directionReversed ? coin1Amount : coin3Amount) || '0'
 
   const haveEnoughUpCoin = useMemo(
     () => upCoin && checkWalletHasEnoughBalance(toTokenAmount(upCoin, upCoinAmount, { alreadyDecimaled: true })),
@@ -349,6 +355,7 @@ function ZapCard() {
         /> */}
         {/* input twin */}
         <>
+        coin2Amount{coin2Amount}
           <CoinInputBox
             className="mt-5"
             disabled={isApprovePanelShown}
@@ -404,10 +411,12 @@ function ZapCard() {
               />
             </Row>
           </div>
+          ---coin3Amount{coin3Amount}---
           <CoinInputBox
-            componentRef={coinInputBox3ComponentRef}
+            className="mt-5"
             disabled={isApprovePanelShown}
-            value={unslippagedCoin3Amount}
+            componentRef={coinInputBox1ComponentRef}
+            value={String(Number(coin3Amount)/2)}
             haveHalfButton
             haveCoinIcon
             canSelect
@@ -416,13 +425,13 @@ function ZapCard() {
               turnOnCoinSelector()
               setTargetCoinNo('3')
             }}
-            onEnter={(input) => {
-              if (!input) return
-              if (!coin2) coinInputBox2ComponentRef.current?.selectToken?.()
-              if (coin2 && coin2Amount) zapButtonComponentRef.current?.click?.()
-            }}
             onUserInput={(amount) => {
               useZap.setState({ coin3Amount: amount, focusSide: 'coin3' })
+            }}
+            onEnter={(input) => {
+              if (!input) return
+              if (!coin2) coinInputBox3ComponentRef.current?.selectToken?.()
+              if (coin2 && coin2Amount) zapButtonComponentRef.current?.click?.()
             }}
             token={coin3}
           />
@@ -553,7 +562,12 @@ function ZapCard() {
             if (!areTokenPairZapable(token, coin3)) {
               useZap.setState({ coin3: undefined })
             }
-          } else {
+          } else if (targetCoinNo === '3') {
+            useZap.setState({ coin3: token })
+            // if (!areTokenPairZapable(token, coin3)) {
+            //   useZap.setState({ coin3: undefined })
+            // }
+          }  {
             useZap.setState({ coin3: token })
             if (!areTokenPairZapable(token, coin2)) {
               useZap.setState({ coin2: undefined })
@@ -609,8 +623,10 @@ function ZapPriceAcceptChip() {
   const { hasAcceptedPriceChange, setHasAcceptedPriceChange } = useZapContextStore()
   const coin1 = useZap((s) => s.coin1)
   const coin2 = useZap((s) => s.coin2)
+  const coin3 = useZap((s) => s.coin3)
   const coin1Amount = useZap((s) => s.coin1Amount)
   const coin2Amount = useZap((s) => s.coin2Amount)
+  const coin3Amount = useZap((s) => s.coin3Amount)
   const directionReversed = useZap((s) => s.directionReversed)
   const focusSide = directionReversed ? 'coin2' : 'coin1'
   const focusSideCoin = focusSide === 'coin1' ? coin1 : coin2

@@ -77,9 +77,10 @@ export type LiquidityStore = {
 
   /** with slippage */
   coin2Amount?: string // for coin may be not selected yet, so it can't be TokenAmount
+  coin3Amount?: string // for coin may be not selected yet, so it can't be TokenAmount
   unslippagedCoin2Amount?: string // for coin may be not selected yet, so it can't be TokenAmount
 
-  focusSide: 'coin1' | 'coin2' // not reflect ui placement.  maybe coin1 appears below coin2
+  focusSide: 'coin1' | 'coin2' | 'coin3' // not reflect ui placement.  maybe coin1 appears below coin2
   isRemoveDialogOpen: boolean
   isAddDialogOpen: boolean
   isSearchAmmDialogOpen: boolean
