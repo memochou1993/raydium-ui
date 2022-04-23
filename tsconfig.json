@@ -26,6 +26,6 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/application/messageBoard/useMessageBoardLocalStorage.tss"
-  ],
+, "src/application/zap/Zap.tsxuse"  ],
   "exclude": ["node_modules", ".next", "out"]
 }

@@ -9,11 +9,19 @@ import { HexAddress, MayFunction } from '@/types/constants'
 import useAppSettings from './appSettings/useAppSettings'
 import useLiquidity from './liquidity/useLiquidity'
 import { useSwap } from './swap/useSwap'
+import { useZap } from './zap/useZap'
 import { SplToken } from './token/type'
 import useToken from './token/useToken'
 import useFarms from './farms/useFarms'
 
 export type PageRouteConfigs = {
+  '/zap': {
+    queryProps?: {
+      coin1?: SplToken
+      coin2?: SplToken
+      ammId?: HexAddress
+    }
+  }
   '/swap': {
     queryProps?: {
       coin1?: SplToken
@@ -53,7 +61,19 @@ export function routeTo<ToPage extends keyof PageRouteConfigs>(
   opts?: MayFunction<PageRouteConfigs[ToPage], [{ currentPageQuery: ParsedUrlQuery }]>
 ): void {
   const options = shrinkToValue(opts, [{ currentPageQuery: router.query }])
-  if (toPage === '/swap') {
+  if (toPage === '/zap') {
+    const coin1 =
+      options?.queryProps?.coin1 ??
+      (router.pathname.includes('/liquidity/add') ? useLiquidity.getState().coin1 : undefined)
+    const coin2 =
+      options?.queryProps?.coin2 ??
+      (router.pathname.includes('/liquidity/add') ? useLiquidity.getState().coin2 : undefined)
+    const isSwapDirectionReversed = useZap.getState().directionReversed
+    router.push({ pathname: '/zap' }).then(() => {
+      const targetState = objectShakeFalsy(isSwapDirectionReversed ? { coin2: coin1, coin1: coin2 } : { coin1, coin2 })
+      useZap.setState(targetState)
+    })
+  } else if (toPage === '/swap') {
     const coin1 =
       options?.queryProps?.coin1 ??
       (router.pathname.includes('/liquidity/add') ? useLiquidity.getState().coin1 : undefined)

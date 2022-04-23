@@ -362,6 +362,9 @@ function SideMenu({ className, onClickCloseBtn }: { className?: string; onClickC
             <LinkItem icon="/icons/entry-icon-swap.svg" href="/swap" isCurrentRoutePath={pathname.includes('swap')}>
               Swap
             </LinkItem>
+            <LinkItem icon="/icons/entry-icon-swap.svg" href="/zap" isCurrentRoutePath={pathname.includes('zap')}>
+              Zap
+            </LinkItem>
             <LinkItem
               icon="/icons/entry-icon-liquidity.svg"
               href="/liquidity/add"
