@@ -12,6 +12,8 @@ import useLiquidity from '../useLiquidity'
 import handleMultiTx from '@/application/txTools/handleMultiTx'
 import { loadTransaction } from '@/application/txTools/createTransaction'
 
+import { usePools } from '@/application/pools/usePools';
+
 export default function txAddLiquidity({ ammId: targetAmmId }: { ammId?: PublicKeyish } = {}) {
   return handleMultiTx(async ({ transactionCollector, baseUtils: { connection, owner } }) => {
     const { checkWalletHasEnoughBalance, tokenAccountRawInfos } = useWallet.getState()
@@ -48,6 +50,7 @@ export default function txAddLiquidity({ ammId: targetAmmId }: { ammId?: PublicK
       },
       onTxSentSuccess: () => {
         useLiquidity.setState({ isAddDialogOpen: false })
+        usePools.getState().refreshPools();
       }
     })
   })
