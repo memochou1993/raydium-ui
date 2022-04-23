@@ -1,10 +1,13 @@
 import React, { createRef, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { RouteInfo } from '@raydium-io/raydium-sdk'
+import { RouteInfo, Percent } from '@raydium-io/raydium-sdk'
 
+import BN from 'bn.js'
 import { twMerge } from 'tailwind-merge'
 
 import useAppSettings from '@/application/appSettings/useAppSettings'
+import useLiquidity from '@/application/liquidity/useLiquidity'
+import useFarms from '@/application/farms/useFarms'
 import useNotification from '@/application/notification/useNotification'
 import { routeTo } from '@/application/routeTools'
 import { getCoingeckoChartPriceData } from '@/application/zap/klinePrice'
@@ -27,6 +30,7 @@ import { USDCMint, USDTMint } from '@/application/token/utils/wellknownToken.con
 import useWallet from '@/application/wallet/useWallet'
 import Button, { ButtonHandle } from '@/components/Button'
 import Card from '@/components/Card'
+import CoinAvatarPair from '@/components/CoinAvatarPair'
 import { Checkbox } from '@/components/Checkbox'
 import CoinAvatar from '@/components/CoinAvatar'
 import CoinInputBox, { CoinInputBoxHandle } from '@/components/CoinInputBox'
@@ -38,6 +42,7 @@ import FadeInStable, { FadeIn } from '@/components/FadeIn'
 import Icon from '@/components/Icon'
 import Input from '@/components/Input'
 import Link from '@/components/Link'
+import List from '@/components/List'
 import PageLayout from '@/components/PageLayout'
 import RefreshCircle from '@/components/RefreshCircle'
 import Row from '@/components/Row'
@@ -76,6 +81,7 @@ const { ContextProvider: ZapUIContextProvider, useStore: useZapContextStore } = 
   hasAcceptedPriceChange: false,
   coinInputBox1ComponentRef: createRef<CoinInputBoxHandle>(),
   coinInputBox2ComponentRef: createRef<CoinInputBoxHandle>(),
+  coinInputBox3ComponentRef: createRef<CoinInputBoxHandle>(),
   zapButtonComponentRef: createRef<ButtonHandle>()
 })
 
@@ -87,6 +93,7 @@ export default function Zap() {
         <ZapHead />
         <ZapCard />
         {/* <UnwrapWSOL /> */}
+        <UserLiquidityExhibition />
         <KLineChart />
       </PageLayout>
     </ZapUIContextProvider>
@@ -191,10 +198,6 @@ function ZapHead() {
 
 function ZapCard() {
   const { connected: walletConnected } = useWallet()
-  const coin1 = useZap((s) => s.coin1)
-  const coin2 = useZap((s) => s.coin2)
-  const coin1Amount = useZap((s) => s.coin1Amount)
-  const coin2Amount = useZap((s) => s.coin2Amount)
   // console.log('coin: ', coin1?.symbol, coin1Amount, coin2?.symbol, coin2Amount)
   const directionReversed = useZap((s) => s.directionReversed)
   const priceImpact = useZap((s) => s.priceImpact)
@@ -202,10 +205,33 @@ function ZapCard() {
   const balances = useWallet((s) => s.balances)
   const routes = useZap((s) => s.routes)
   const zapable = useZap((s) => s.zapable)
+
+  const {
+    coin1,
+    coin1Amount,
+    coin2,
+    coin2Amount,
+    unslippagedCoin2Amount,
+    coin3,
+    coin3Amount,
+    unslippagedCoin3Amount,
+    // currentJsonInfo,
+    currentHydratedInfo
+    // isSearchAmmDialogOpen,
+    // refreshLiquidity
+  } = useZap()
+
+  const hasHydratedLiquidityPool = useMemo(() => Boolean(currentHydratedInfo), [currentHydratedInfo])
+
   const refreshTokenPrice = useToken((s) => s.refreshTokenPrice)
   const { hasConfirmed, popConfirm: popunOfficialConfirm } = useunOfficialTokenConfirmState()
-  const { hasAcceptedPriceChange, zapButtonComponentRef, coinInputBox1ComponentRef, coinInputBox2ComponentRef } =
-    useZapContextStore()
+  const {
+    hasAcceptedPriceChange,
+    zapButtonComponentRef,
+    coinInputBox1ComponentRef,
+    coinInputBox2ComponentRef,
+    coinInputBox3ComponentRef
+  } = useZapContextStore()
 
   const checkWalletHasEnoughBalance = useWallet((s) => s.checkWalletHasEnoughBalance)
 
@@ -226,7 +252,7 @@ function ZapCard() {
     useZap.setState((s) => ({ directionReversed: !s.directionReversed }))
   }, [])
   const [isCoinSelectorOn, { on: turnOnCoinSelector, off: turnOffCoinSelector }] = useToggle()
-  const [targetCoinNo, setTargetCoinNo] = useState<'1' | '2'>('1')
+  const [targetCoinNo, setTargetCoinNo] = useState<'1' | '2' | '3'>('1')
 
   const executionPrice = useZap((s) => s.executionPrice)
 
@@ -295,38 +321,11 @@ function ZapCard() {
               executionPrice ? 'left-4' : 'left-1/2 -translate-x-1/2'
             }`}
           >
-            <Icon
-              size="sm"
-              iconSrc="/icons/msic-swap.svg"
-              className={`p-2 frosted-glass frosted-glass-teal rounded-full mr-4 ${
-                isApprovePanelShown ? 'not-clickable' : 'clickable'
-              } select-none transition`}
-              onClick={() => {
-                if (isApprovePanelShown) return
-                toggleUIZap()
-                switchDirectionReversed()
-              }}
-            />
-            {executionPrice && (
-              <div className="absolute left-full">
-                <ZapCardPriceIndicator />
-              </div>
-            )}
+            To
           </Row>
-          <div className="absolute right-0">
-            <RefreshCircle
-              run={!isApprovePanelShown}
-              refreshKey="zap"
-              popPlacement="right-bottom"
-              freshFunction={() => {
-                refreshZap()
-                refreshTokenPrice()
-              }}
-            />
-          </div>
         </div>
 
-        <CoinInputBox
+        {/* <CoinInputBox
           domRef={zapElementBox2}
           disabled={isApprovePanelShown}
           disabledInput={!directionReversed}
@@ -349,7 +348,88 @@ function ZapCard() {
           onUserInput={(value) => {
             useZap.setState({ focusSide: 'coin2', coin2Amount: value })
           }}
-        />
+        /> */}
+        {/* input twin */}
+        <>
+          <CoinInputBox
+            className="mt-5"
+            disabled={isApprovePanelShown}
+            componentRef={coinInputBox1ComponentRef}
+            value={unslippagedCoin2Amount}
+            haveHalfButton
+            haveCoinIcon
+            canSelect
+            topLeftLabel=""
+            onTryToTokenSelect={() => {
+              turnOnCoinSelector()
+              setTargetCoinNo('2')
+            }}
+            onUserInput={(amount) => {
+              useZap.setState({ coin2Amount: amount, focusSide: 'coin2' })
+            }}
+            onEnter={(input) => {
+              if (!input) return
+              if (!coin3) coinInputBox3ComponentRef.current?.selectToken?.()
+              if (coin3 && coin3Amount) zapButtonComponentRef.current?.click?.()
+            }}
+            token={coin2}
+          />
+
+          {/* swap button */}
+          <div className="relative h-8 my-4">
+            <Row
+              className={`absolute h-full items-center transition-all ${
+                hasHydratedLiquidityPool ? 'left-4' : 'left-1/2 -translate-x-1/2'
+              }`}
+            >
+              <Icon heroIconName="plus" className="p-1 mr-4 mobile:mr-2 text-[#39D0D8]" />
+              <FadeIn>{hasHydratedLiquidityPool && <LiquidityCardPriceIndicator className="w-max" />}</FadeIn>
+            </Row>
+            <Row className="absolute right-0 items-center">
+              <Icon
+                size="sm"
+                heroIconName="search"
+                className="p-2 frosted-glass frosted-glass-teal rounded-full mr-4 clickable text-[#39D0D8] select-none"
+                onClick={() => {
+                  //useZap.setState({ isSearchAmmDialogOpen: true })
+                }}
+              />
+              <RefreshCircle
+                run={!isApprovePanelShown}
+                refreshKey="liquidity/add"
+                popPlacement="right-bottom"
+                freshFunction={() => {
+                  if (isApprovePanelShown) return
+                  //refreshLiquidity()
+                  refreshTokenPrice()
+                }}
+              />
+            </Row>
+          </div>
+
+          <CoinInputBox
+            componentRef={coinInputBox3ComponentRef}
+            disabled={isApprovePanelShown}
+            value={unslippagedCoin3Amount}
+            haveHalfButton
+            haveCoinIcon
+            canSelect
+            topLeftLabel=""
+            onTryToTokenSelect={() => {
+              turnOnCoinSelector()
+              setTargetCoinNo('3')
+            }}
+            onEnter={(input) => {
+              if (!input) return
+              if (!coin2) coinInputBox2ComponentRef.current?.selectToken?.()
+              if (coin2 && coin2Amount) zapButtonComponentRef.current?.click?.()
+            }}
+            onUserInput={(amount) => {
+              useZap.setState({ coin3Amount: amount, focusSide: 'coin3' })
+            }}
+            token={coin3}
+          />
+        </>
       </div>
       {/* info panel */}
       <FadeInStable show={hasZapDetermined}>
@@ -468,13 +548,18 @@ function ZapCard() {
         onSelectCoin={(token) => {
           if (targetCoinNo === '1') {
             useZap.setState({ coin1: token })
-            if (!areTokenPairZapable(token, coin2)) {
-              useZap.setState({ coin2: undefined })
+            // if (!areTokenPairZapable(token, coin2)) {
+            //   useZap.setState({ coin2: undefined })
+            // }
+          } else if (targetCoinNo === '2') {
+            useZap.setState({ coin2: token })
+            if (!areTokenPairZapable(token, coin3)) {
+              useZap.setState({ coin3: undefined })
             }
           } else {
-            useZap.setState({ coin2: token })
-            if (!areTokenPairZapable(token, coin1)) {
-              useZap.setState({ coin1: undefined })
+            useZap.setState({ coin3: token })
+            if (!areTokenPairZapable(token, coin2)) {
+              useZap.setState({ coin2: undefined })
             }
           }
           turnOffCoinSelector()
@@ -1195,3 +1280,225 @@ function KLineChartItemThumbnail({
 //     </div>
 //   )
 // }
+
+function LiquidityCardPriceIndicator({ className }: { className?: string }) {
+  const [innerReversed, setInnerReversed] = useState(false)
+
+  const currentHydratedInfo = useZap((s) => s.currentHydratedInfo)
+  const coin1 = useZap((s) => s.coin2)
+  const coin2 = useZap((s) => s.coin3)
+  const isMobile = useAppSettings((s) => s.isMobile)
+
+  const pooledBaseTokenAmount = currentHydratedInfo?.baseToken
+    ? toTokenAmount(currentHydratedInfo.baseToken, currentHydratedInfo.baseReserve)
+    : undefined
+  const pooledQuoteTokenAmount = currentHydratedInfo?.quoteToken
+    ? toTokenAmount(currentHydratedInfo.quoteToken, currentHydratedInfo.quoteReserve)
+    : undefined
+
+  const isCoin1Base = String(currentHydratedInfo?.baseMint) === String(coin1?.mint)
+  const [poolCoin1TokenAmount, poolCoin2TokenAmount] = isCoin1Base
+    ? [pooledBaseTokenAmount, pooledQuoteTokenAmount]
+    : [pooledQuoteTokenAmount, pooledBaseTokenAmount]
+
+  const price =
+    isMeaningfulNumber(poolCoin1TokenAmount) && poolCoin2TokenAmount
+      ? div(poolCoin2TokenAmount, poolCoin1TokenAmount)
+      : undefined
+
+  const innerPriceLeftCoin = innerReversed ? coin2 : coin1
+  const innerPriceRightCoin = innerReversed ? coin1 : coin2
+
+  if (!price) return null
+  return (
+    <Row className={twMerge('font-medium text-sm text-[#ABC4FF]', className)}>
+      {1} {innerPriceLeftCoin?.symbol ?? '--'} ≑{' '}
+      {toString(innerReversed ? div(1, price) : price, {
+        decimalLength: isMobile ? 'auto 2' : 'auto',
+        zeroDecimalNotAuto: true
+      })}{' '}
+      {innerPriceRightCoin?.symbol ?? '--'}
+      <div className="ml-2 clickable" onClick={() => setInnerReversed((b) => !b)}>
+        ⇋
+      </div>
+    </Row>
+  )
+}
+
+function UserLiquidityExhibition() {
+  const hydratedInfos = useLiquidity((s) => s.hydratedInfos)
+  const userExhibitionLiquidityIds = useLiquidity((s) => s.userExhibitionLiquidityIds)
+  const isRemoveDialogOpen = useLiquidity((s) => s.isRemoveDialogOpen)
+  const scrollToInputBox = useLiquidity((s) => s.scrollToInputBox)
+  const farmPoolsList = useFarms((s) => s.jsonInfos)
+  const getToken = useToken((s) => s.getToken)
+
+  const balances = useWallet((s) => s.balances)
+  const rawBalances = useWallet((s) => s.rawBalances)
+  const isMobile = useAppSettings((s) => s.isMobile)
+
+  const computeSharePercentValue = (percent: Percent | undefined) => {
+    if (!percent) return '--%'
+    if (percent.numerator.mul(new BN(10000)).div(percent.denominator).lt(new BN(1))) return '<0.01%'
+    return percent.mul(new BN(100)).toFixed(2) + '%'
+  }
+
+  const exhibitionInfos = useMemo(
+    () => hydratedInfos.filter(({ id }) => userExhibitionLiquidityIds?.includes(String(id))),
+    [hydratedInfos, userExhibitionLiquidityIds]
+  )
+  return (
+    <div className="mt-12 max-w-[456px] self-center">
+      <div className="mb-6 text-xl font-medium text-white">Your Liquidity</div>
+      <Card
+        className="p-6 mt-6 mobile:py-5 mobile:px-3"
+        size="lg"
+        style={{
+          background:
+            'linear-gradient(140.14deg, rgba(0, 182, 191, 0.15) 0%, rgba(27, 22, 89, 0.1) 86.61%), linear-gradient(321.82deg, #18134D 0%, #1B1659 100%)'
+        }}
+      >
+        <List className={`flex flex-col gap-6 mobile:gap-5 ${exhibitionInfos.length ? 'mb-5' : ''}`}>
+          {exhibitionInfos.map((info, idx) => {
+            const correspondingFarm = farmPoolsList.find(
+              (farmJsonInfo) => farmJsonInfo.lpMint === toPubString(info.lpMint)
+            )
+            return (
+              <List.Item key={idx}>
+                <FadeIn>
+                  <Collapse className="py-4 px-6 mobile:px-4 ring-inset ring-1.5 ring-[rgba(171,196,255,.5)] rounded-3xl mobile:rounded-xl">
+                    <Collapse.Face>
+                      {(open) => (
+                        <Row className="items-center justify-between">
+                          <Row className="gap-2 items-center">
+                            <CoinAvatarPair
+                              className="justify-self-center"
+                              token1={info.baseToken}
+                              token2={info.quoteToken}
+                              size={isMobile ? 'sm' : 'md'}
+                            />
+                            <div className="text-base font-normal text-[#abc4ff]">
+                              {info.baseToken?.symbol ?? ''}/{info.quoteToken?.symbol ?? ''}
+                            </div>
+                          </Row>
+                          <Icon
+                            size="sm"
+                            className="text-[#abc4ff]"
+                            heroIconName={`${open ? 'chevron-up' : 'chevron-down'}`}
+                          />
+                        </Row>
+                      )}
+                    </Collapse.Face>
+                    <Collapse.Body>
+                      <Col className="border-t-1.5 border-[rgba(171,196,255,.5)] mt-5 mobile:mt-4 py-5 gap-3">
+                        <Row className="justify-between">
+                          <div className="text-xs mobile:text-2xs font-medium text-[#abc4ff]">Pooled (Base)</div>
+                          <div className="text-xs mobile:text-2xs font-medium text-white">
+                            {toString(info.userBasePooled) || '--'} {info.baseToken?.symbol}
+                          </div>
+                        </Row>
+                        <Row className="justify-between">
+                          <div className="text-xs mobile:text-2xs font-medium text-[#abc4ff]">Pooled (Quote)</div>
+                          <div className="text-xs mobile:text-2xs font-medium text-white">
+                            {toString(info.userQuotePooled) || '--'} {info.quoteToken?.symbol}
+                          </div>
+                        </Row>
+                        <Row className="justify-between">
+                          <div className="text-xs mobile:text-2xs font-medium text-[#abc4ff]">Your Liquidity</div>
+                          <div className="text-xs mobile:text-2xs font-medium text-white">
+                            {info.lpMint
+                              ? toString(div(rawBalances[String(info.lpMint)], 10 ** info.lpDecimals), {
+                                  decimalLength: `auto ${info.lpDecimals}`
+                                })
+                              : '--'}{' '}
+                            LP
+                          </div>
+                        </Row>
+                        <Row className="justify-between">
+                          <div className="text-xs mobile:text-2xs font-medium text-[#abc4ff]">Your share</div>
+                          <div className="text-xs mobile:text-2xs font-medium text-white">
+                            {computeSharePercentValue(info.sharePercent)}
+                          </div>
+                        </Row>
+                      </Col>
+                      <Row className="gap-4 mb-1">
+                        <Button
+                          className="text-base mobile:text-sm font-medium frosted-glass frosted-glass-teal rounded-xl flex-grow"
+                          onClick={() => {
+                            useLiquidity.setState({
+                              currentJsonInfo: info.jsonInfo
+                            })
+                            scrollToInputBox()
+                          }}
+                        >
+                          Add Liquidity
+                        </Button>
+                        <Tooltip>
+                          <Icon
+                            size="smi"
+                            iconSrc="/icons/pools-farm-entry.svg"
+                            className={`grid place-items-center w-10 h-10 mobile:w-8 mobile:h-8 ring-inset ring-1 mobile:ring-1 ring-[rgba(171,196,255,.5)] rounded-xl mobile:rounded-lg text-[rgba(171,196,255,.5)] clickable-filter-effect ${
+                              correspondingFarm ? 'clickable' : 'not-clickable'
+                            }`}
+                            onClick={() => {
+                              routeTo('/farms', {
+                                queryProps: {
+                                  searchText: shakeFalsyItem([
+                                    String(info.baseToken?.symbol ?? ''),
+                                    String(info.quoteToken?.symbol ?? '')
+                                  ]).join(' ')
+                                }
+                              })
+                            }}
+                          />
+                          <Tooltip.Panel>Farm</Tooltip.Panel>
+                        </Tooltip>
+                        <Tooltip>
+                          <Icon
+                            iconSrc="/icons/msic-swap-h.svg"
+                            size="smi"
+                            className="grid place-items-center w-10 h-10 mobile:w-8 mobile:h-8 ring-inset ring-1 mobile:ring-1 ring-[rgba(171,196,255,.5)] rounded-xl mobile:rounded-lg text-[rgba(171,196,255,.5)] clickable clickable-filter-effect"
+                            onClick={() => {
+                              routeTo('/swap', {
+                                queryProps: {
+                                  coin1: info.baseToken,
+                                  coin2: info.quoteToken
+                                }
+                              })
+                            }}
+                          />
+                          <Tooltip.Panel>Swap</Tooltip.Panel>
+                        </Tooltip>
+                        <Tooltip>
+                          <Icon
+                            size="smi"
+                            iconSrc="/icons/pools-remove-liquidity-entry.svg"
+                            className={`grid place-items-center w-10 h-10 mobile:w-8 mobile:h-8 ring-inset ring-1 mobile:ring-1 ring-[rgba(171,196,255,.5)] rounded-xl mobile:rounded-lg text-[rgba(171,196,255,.5)] clickable clickable-filter-effect`}
+                            onClick={() => {
+                              useZap.setState({ currentJsonInfo: info.jsonInfo })
+                            }}
+                          />
+                          <Tooltip.Panel>Remove Liquidity</Tooltip.Panel>
+                        </Tooltip>
+                      </Row>
+                    </Collapse.Body>
+                  </Collapse>
+                </FadeIn>
+              </List.Item>
+            )
+          })}
+        </List>
+
+        {/* <RemoveLiquidityDialog
+          open={isRemoveDialogOpen}
+          onClose={() => {
+            useLiquidity.setState({ isRemoveDialogOpen: false })
+          }}
+        /> */}
+        <div className="text-xs mobile:text-2xs font-medium text-[rgba(171,196,255,0.5)]">
+          If you staked your LP tokens in a farm, unstake them to see them here
+        </div>
+      </Card>
+    </div>
+  )
+}

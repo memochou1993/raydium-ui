@@ -746,7 +746,7 @@ function PoolCardDatabaseBodyCollapseItemContent({ poolInfo: info }: { poolInfo:
 
   const addLiquidity = () => {
     useLiquidity.setState({ isAddDialogOpen: true })
-  };
+  }
 
   return (
     <AutoBox
@@ -846,10 +846,7 @@ function PoolCardDatabaseBodyCollapseItemContent({ poolInfo: info }: { poolInfo:
           </Row>
         ) : (
           <>
-            <Button
-              className="frosted-glass-teal"
-              onClick={addLiquidity}
-            >
+            <Button className="frosted-glass-teal" onClick={addLiquidity}>
               Add Liquidity
             </Button>
             <Tooltip>

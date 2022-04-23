@@ -274,7 +274,7 @@ async function calculatePairTokenAmount({
       routes.map((route) => sdkParsedInfoMap.get(toPubString(route.keys.id)))
     )
 
-    const zapable = choosedSdkParsedInfos.every((info) => Liquidity.getEnabledFeatures(info).zap)
+    const zapable = choosedSdkParsedInfos.every((info) => Liquidity.getEnabledFeatures(info).swap)
     return {
       executionPrice,
       currentPrice,

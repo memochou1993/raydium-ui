@@ -1,4 +1,6 @@
 import { CurrencyAmount, Price, RouteInfo, RouteType } from '@raydium-io/raydium-sdk'
+import { LiquidityPoolJsonInfo as LiquidityJsonInfo } from '@raydium-io/raydium-sdk'
+import { HydratedLiquidityInfo } from './type'
 
 import create from 'zustand'
 
@@ -15,13 +17,20 @@ export type ZapStore = {
   // queryCoin2Mint?: string
   // queryAmmId?: string
 
+  currentHydratedInfo: HydratedLiquidityInfo | undefined // auto parse info in {@link useZapAuto}
+  currentJsonInfo: LiquidityJsonInfo | undefined
+
   coin1?: SplToken
   coin2?: SplToken
+  coin3?: SplToken
   coin1Amount?: Numberish // may with fee and slippage
   coin2Amount?: Numberish // may with fee and slippage
+  coin3Amount?: Numberish // may with fee and slippage
+  unslippagedCoin2Amount?: string
+  unslippagedCoin3Amount?: string
   hasUISwrapped?: boolean // if user zap coin1 and coin2, this will be true
 
-  focusSide: 'coin1' | 'coin2' // make zap fixed (userInput may change this)
+  focusSide: 'coin1' | 'coin2' | 'coin3' // make zap fixed (userInput may change this)
 
   /** only exist when maxSpent is undefined */
   minReceived?: Numberish // min received amount
@@ -48,6 +57,9 @@ export type ZapStore = {
 }
 
 export const useZap = create<ZapStore>((set, get) => ({
+  currentHydratedInfo: undefined, // auto parse info in {@link useZapAuto}
+  currentJsonInfo: undefined,
+
   directionReversed: false,
 
   focusSide: 'coin1',
