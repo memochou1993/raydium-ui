@@ -114,7 +114,7 @@ async function calculatePairTokenAmount({
   userCoin1Amount?: Numberish
   coin2: SplToken
   userCoin2Amount?: Numberish
-  focusSide: 'coin1' | 'coin2'
+  focusSide: 'coin0' | 'coin1' | 'coin2'
 
   slippageTolerance: Numberish
   currentJsonInfo: LiquidityPoolJsonInfo
