@@ -67,6 +67,11 @@ export type LiquidityStore = {
 
   ammId: string | undefined
 
+  coin0: SplToken | undefined
+
+  /** with slippage */
+  coin0Amount?: string // for coin may be not selected yet, so it can't be TokenAmount
+  
   coin1: SplToken | undefined
 
   /** with slippage */
@@ -79,7 +84,7 @@ export type LiquidityStore = {
   coin2Amount?: string // for coin may be not selected yet, so it can't be TokenAmount
   unslippagedCoin2Amount?: string // for coin may be not selected yet, so it can't be TokenAmount
 
-  focusSide: 'coin1' | 'coin2' // not reflect ui placement.  maybe coin1 appears below coin2
+  focusSide: 'coin0' | 'coin1' | 'coin2' // not reflect ui placement.  maybe coin1 appears below coin2
   isRemoveDialogOpen: boolean
   isAddDialogOpen: boolean
   isSearchAmmDialogOpen: boolean
@@ -167,6 +172,8 @@ const useLiquidity = create<LiquidityStore>((set, get) => ({
   currentHydratedInfo: undefined, // auto parse info in {@link useLiquidityAuto}
 
   ammId: '',
+
+  coin0: undefined,
 
   coin1: undefined,
 

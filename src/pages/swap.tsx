@@ -139,7 +139,7 @@ function useunOfficialTokenConfirmState(): { hasConfirmed: boolean; popConfirm: 
       additionalContent: (
         <Checkbox
           defaultChecked={hasUserPermanentConfirmed}
-          className="my-2 w-max mx-auto"
+          className="mx-auto my-2 w-max"
           onChange={(newChecked) => {
             if (!downCoin?.mint) return
             if (newChecked) {
@@ -174,7 +174,7 @@ function useunOfficialTokenConfirmState(): { hasConfirmed: boolean; popConfirm: 
 
 function SwapHead() {
   return (
-    <Row className="justify-center  mb-12 mobile:mb-2">
+    <Row className="justify-center mb-12 mobile:mb-2">
       <Tabs
         currentValue={'Swap'}
         values={['Swap', 'Liquidity']}
@@ -254,7 +254,7 @@ function SwapCard() {
     <CyberpunkStyleCard
       domRef={cardRef}
       wrapperClassName="w-[min(456px,100%)] self-center cyberpunk-bg-light"
-      className="py-8 pt-4 px-6 mobile:py-5 mobile:px-3"
+      className="px-6 py-8 pt-4 mobile:py-5 mobile:px-3"
       size="lg"
       style={{
         background:
@@ -262,7 +262,7 @@ function SwapCard() {
       }}
     >
       {/* input twin */}
-      <div className="space-y-5 mt-5">
+      <div className="mt-5 space-y-5">
         <CoinInputBox
           domRef={swapElementBox1}
           disabled={isApprovePanelShown}
@@ -361,7 +361,7 @@ function SwapCard() {
       {/* swap sol and wsol */}
       {isSolToWsol(upCoin, downCoin) || isWsolToSol(upCoin, downCoin) ? (
         <Button
-          className="w-full frosted-glass-teal mt-5"
+          className="w-full mt-5 frosted-glass-teal"
           componentRef={swapButtonComponentRef}
           validators={[
             {
@@ -395,7 +395,7 @@ function SwapCard() {
         </Button>
       ) : (
         <Button
-          className="w-full frosted-glass-teal mt-5"
+          className="w-full mt-5 frosted-glass-teal"
           componentRef={swapButtonComponentRef}
           validators={[
             {
@@ -816,7 +816,7 @@ function SwapCardInfo({ className }: { className?: string }) {
                     }}
                     pattern={/^\d*\.?\d*$/}
                   />
-                  <div className="opacity-50 ml-1">%</div>
+                  <div className="ml-1 opacity-50">%</div>
                 </Row>
               }
             />
@@ -874,7 +874,7 @@ function SwapCardTooltipPanelAddress() {
   const routes = useSwap((s) => s.routes)
   return (
     <div className="w-56">
-      <div className="text-sm font-semibold mb-2">Addresses</div>
+      <div className="mb-2 text-sm font-semibold">Addresses</div>
       <Col className="gap-2">
         <SwapCardTooltipPanelAddressItem
           label={coin1?.symbol ?? '--'}
@@ -1042,8 +1042,8 @@ function KLineChartItem({
     <FadeIn>
       {canShowKline && (
         <div className="flex mobile:grid mobile:grid-cols-3 mobile:gap-2 p-4 mobile:py-4 w-[min(456px,100%)] self-center items-center">
-          <Row className="items-center mobile:justify-self-center w-16 mobile:w-8 flex-shrink-0">
-            <Col className="gap-1 grow  mobile:items-center">
+          <Row className="items-center flex-shrink-0 w-16 mobile:justify-self-center mobile:w-8">
+            <Col className="gap-1 grow mobile:items-center">
               <CoinAvatar token={coin} size={isMobile ? 'sm' : 'smi'} />
               <div className="font-medium text-sm text-[#abc4ff]">{coin?.symbol ?? '--'}</div>
             </Col>
@@ -1060,7 +1060,7 @@ function KLineChartItem({
             </div>
           </Col>
 
-          <Col className="items-start mobile:items-center mobile:justify-self-center ml-8  mobile:ml-0 w-8">
+          <Col className="items-start w-8 ml-8 mobile:items-center mobile:justify-self-center mobile:ml-0">
             <div className="text-xs font-medium text-[rgba(171,196,255,0.5)]">24H%</div>
             <div
               className={`text-sm font-medium ${
@@ -1071,7 +1071,7 @@ function KLineChartItem({
             </div>
           </Col>
           <KLineChartItemThumbnail
-            className="ml-10 w-36 mobile:w-full h-12 mobile:col-span-full  mobile:m-0 mobile:mt-4 flex-shrink-0"
+            className="flex-shrink-0 h-12 ml-10 w-36 mobile:w-full mobile:col-span-full mobile:m-0 mobile:mt-4"
             isPositive={isPositive}
             isNegative={isNegative}
             pricePoints={pricePoints!}
@@ -1172,7 +1172,7 @@ function KLineChartItemThumbnail({
 //                   'linear-gradient(140.14deg, rgba(0, 182, 191, 0.15) 0%, rgba(27, 22, 89, 0.1) 86.61%), linear-gradient(321.82deg, #18134D 0%, #1B1659 100%)'
 //               }}
 //             >
-//               <Row className="gap-4 items-center">
+//               <Row className="items-center gap-4">
 //                 <Col className="gap-1">
 //                   <div className="text-xs mobile:text-2xs font-medium text-[rgba(171,196,255,0.5)]">
 //                     Click the button if you want to unwrap all WSOL

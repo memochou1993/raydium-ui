@@ -71,7 +71,8 @@ export default function useLiquidityAmountCalculator() {
       })
       if (focusSide === 'coin1') {
         useLiquidity.setState({ coin2Amount: pairCoinAmount, unslippagedCoin2Amount: unslippagedPairCoinAmount })
-      } else {
+      }
+      if (focusSide === 'coin2') {
         useLiquidity.setState({ coin1Amount: pairCoinAmount, unslippagedCoin1Amount: unslippagedPairCoinAmount })
       }
     } catch (err) {

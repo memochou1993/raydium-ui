@@ -10,7 +10,10 @@ import toPubString from '@/functions/format/toMintString'
 export default function useLiquidityInitCoinFiller() {
   const getToken = useToken((s) => s.getToken)
   useEffect(() => {
-    const { coin1, coin2 } = useLiquidity.getState()
+    const { coin0, coin1, coin2 } = useLiquidity.getState()
+    if (!coin0 && toPubString(coin2?.mint) !== toPubString(QuantumSOLVersionSOL.mint)) {
+      useLiquidity.setState({ coin0: QuantumSOLVersionSOL })
+    }
     if (!coin1 && toPubString(coin2?.mint) !== toPubString(QuantumSOLVersionSOL.mint)) {
       useLiquidity.setState({ coin1: QuantumSOLVersionSOL })
     }
