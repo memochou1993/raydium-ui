@@ -300,6 +300,8 @@ function LiquidityCard() {
             useLiquidity.setState({
               focusSide: 'coin0',
               coin0Amount: value,
+              coin1Amount: String(coin1Amount),
+              coin2Amount: String(coin2Amount),
               unslippagedCoin1Amount: String(coin1Amount),
               unslippagedCoin2Amount: String(coin2Amount)
             })
