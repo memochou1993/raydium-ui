@@ -60,8 +60,6 @@ import { Badge } from '@/components/Badge'
 import { isMintEqual } from '@/functions/judgers/areEqual'
 import { SplToken } from '@/application/token/type'
 
-import useSwapInitCoinFiller from '@/application/swap/useSwapInitCoinFiller'
-
 const { ContextProvider: LiquidityUIContextProvider, useStore: useLiquidityContextStore } = createContextStore({
   hasAcceptedPriceChange: false,
   coinInputBox0ComponentRef: createRef<CoinInputBoxHandle>(),
@@ -84,7 +82,6 @@ export default function Zap() {
 }
 
 function LiquidityEffect() {
-  useSwapInitCoinFiller()
   useLiquidityUrlParser()
   useLiquidityInitCoinFiller()
   useLiquidityAmmSelector()
@@ -222,8 +219,12 @@ function LiquidityCard() {
   } = useLiquidity()
   const refreshTokenPrice = useToken((s) => s.refreshTokenPrice)
 
-  const { coinInputBox0ComponentRef, coinInputBox1ComponentRef, coinInputBox2ComponentRef, liquidityButtonComponentRef } =
-    useLiquidityContextStore()
+  const {
+    coinInputBox0ComponentRef,
+    coinInputBox1ComponentRef,
+    coinInputBox2ComponentRef,
+    liquidityButtonComponentRef
+  } = useLiquidityContextStore()
   const hasFoundLiquidityPool = useMemo(() => Boolean(currentJsonInfo), [currentJsonInfo])
   const hasHydratedLiquidityPool = useMemo(() => Boolean(currentHydratedInfo), [currentHydratedInfo])
 
