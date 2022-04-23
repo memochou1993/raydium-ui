@@ -307,6 +307,13 @@ function LiquidityCard() {
             })
           }}
         />
+        <div className="relative h-8 my-4">
+          <Row
+            className={`absolute h-full items-center transition-all left-1/2 -translate-x-1/2`}
+          >
+            To
+          </Row>
+        </div>
         <CoinInputBox
           className="mt-5"
           disabled={isApprovePanelShown}
