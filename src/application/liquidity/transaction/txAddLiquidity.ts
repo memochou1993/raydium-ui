@@ -45,6 +45,9 @@ export default function txAddLiquidity({ ammId: targetAmmId }: { ammId?: PublicK
       txHistoryInfo: {
         title: 'Add liquidity',
         description: `Add ${toString(coin1Amount)} ${coin1.symbol} and ${toString(coin2Amount)} ${coin2.symbol}`
+      },
+      onTxSentSuccess: () => {
+        useLiquidity.setState({ isAddDialogOpen: false })
       }
     })
   })

@@ -42,7 +42,7 @@ export default function txRemoveLiquidity({ ammId: targetAmmId }: { ammId?: Publ
         title: 'Remove liquidity',
         description: `Remove  ${removeTokenAmount.toExact()} ${lpToken.symbol}`
       },
-      onTxSuccess: () => {
+      onTxSentSuccess: () => {
         useLiquidity.setState({ removeAmount: '', isRemoveDialogOpen: false })
       }
     })
