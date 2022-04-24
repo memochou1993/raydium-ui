@@ -48,6 +48,7 @@ export default function txAddLiquidity({ ammId: targetAmmId }: { ammId?: PublicK
       },
       onTxSentSuccess: () => {
         useLiquidity.setState({ isAddDialogOpen: false })
+        useLiquidity().refreshLiquidity()
       }
     })
   })
